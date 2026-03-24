@@ -15,7 +15,7 @@ Add reproducer shrinking algorithm|high|area:generator|type:feature|Minimize fai
 Add crash signature hashing|medium|area:generator|type:feature|Create stable signature hash from category stack and key fields.|Equivalent failures produce identical signature hash.|
 Add duplicate crash de-dup index|medium|area:generator|type:feature|Group repeated failures by signature to reduce noise.|Dashboard and CLI report grouped counts and newest sample.|
 Add regression suite loader|medium|area:generator|type:feature|Load previously exported fixtures and execute as regression pack.|Suite runner returns pass fail summary and per case status.|
-Build run history table UI|trivial|area:web|type:task|Implement dashboard table listing run id status duration and seed count.|Table supports basic pagination and links to run detail.|
+Build run history table UI|trivial|area:web|type:task|Implement dashboard table listing run id status duration and seed count.|Table supports basic pagination and links to run detail.|implemented
 Build crash detail drawer UI|medium|area:web|type:feature|Show failure category signature payload and replay action in side drawer.|Drawer opens from history row and preserves browser state.|
 Add state change diff view|high|area:web|type:feature|Render readable before and after ledger entry changes from simulation output.|Diff highlights created updated deleted changes with type labels.|
 Build resource fee insight panel|medium|area:web|type:feature|Display cpu mem and min resource fee with warning thresholds.|Panel flags expensive runs and links to related run details.|
