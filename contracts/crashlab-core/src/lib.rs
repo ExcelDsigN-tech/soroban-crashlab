@@ -5,6 +5,7 @@ pub mod reproducer;
 pub mod taxonomy;
 
 pub use auth_matrix::{AuthMode, MatrixReport, ModeResult, collect_mismatched, run_matrix};
+pub use prng::SeededPrng;
 pub use health::{
     FailureMetrics, HealthMonitor, HealthStatus, HealthSummary, QueueMetrics, ThroughputMetrics,
 };

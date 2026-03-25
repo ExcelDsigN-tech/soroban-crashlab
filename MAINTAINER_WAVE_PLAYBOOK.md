@@ -71,6 +71,50 @@ Review inside 24 hours to prevent unnecessary automated appeals. Review in this 
 - If work quality is acceptable but merge is blocked for external reasons, resolve per Wave guidance so contributor effort is credited.
 - Move partial work to follow-up issues with clear boundaries.
 
+## Contributor SLA targets
+
+These timers define the maximum response and review windows for every
+participant in the Wave sprint. All times are wall-clock hours from the
+triggering event.
+
+| Event | Timer | Owner | Escalation after |
+|---|---|---|---|
+| New application received | 24 h | Wave maintainer | Wave lead at 36 h |
+| Issue assigned — first contributor update | 24 h | Assigned contributor | Un-assign + re-open at 48 h |
+| PR submitted — first maintainer review | 24 h | Assigned reviewer | Any available maintainer at 36 h |
+| PR review comment — contributor response | 48 h | Assigned contributor | Stale label + ping at 60 h |
+| Merge-blocked PR — external dependency resolved | 24 h | Blocking maintainer | Wave lead escalation at 36 h |
+| New triage issue (unlabelled, unassigned) | 48 h | Triage maintainer | Wave lead at 72 h |
+
+> **Why 24 h for PR review?** Drips Wave automated appeals trigger when
+> maintainers are unresponsive for more than 24 hours. Missing this window
+> risks automated point grants that bypass our Definition of Done review.
+
+### Escalation path
+
+1. **At threshold** — the owner posts a status update in the issue or PR.
+   No action needed from maintainers if an update is present.
+2. **At escalation timer** — any wave maintainer may step in, re-assign,
+   or apply the `stale` label and request a response within 12 hours.
+3. **After stale label + 12 h silence** — wave lead un-assigns, re-opens
+   the issue for the next contributor, and notes the outcome in the wave log.
+4. **PR review >24 h (automated appeal risk)** — any available maintainer
+   must review immediately regardless of original assignment. Comment
+   `reviewed-by: @<handle>` to mark ownership.
+
+### Running the SLA check
+
+Use `scripts/check-sla.sh` to surface open items past their SLA window:
+
+```bash
+# requires: gh CLI authenticated as a maintainer
+bash scripts/check-sla.sh
+```
+
+The script lists open PRs with no review past 24 h and assigned issues
+with no update past 48 h. It exits non-zero when breaches are found so
+it can be wired into a CI schedule.
+
 ## Post-resolution feedback
 
 - Leave practical, direct feedback.
