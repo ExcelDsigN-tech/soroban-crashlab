@@ -80,34 +80,37 @@ mod tests {
                 schema: 1,
                 seed: CaseSeed { id: 1, payload: vec![1] },
                 signature: CrashSignature {
-                    category: FailureClass::Auth,
+                    category: FailureClass::Auth.to_string(),
                     digest: 1,
                     signature_hash: 1,
                 },
                 environment: None,
                 failure_payload: vec![],
+                rpc_envelope: None,
             },
             CaseBundleDocument {
                 schema: 1,
                 seed: CaseSeed { id: 3, payload: vec![3] },
                 signature: CrashSignature {
-                    category: FailureClass::Budget,
+                    category: FailureClass::Budget.to_string(),
                     digest: 3,
                     signature_hash: 3,
                 },
                 environment: None,
                 failure_payload: vec![],
+                rpc_envelope: None,
             },
             CaseBundleDocument {
                 schema: 1,
                 seed: CaseSeed { id: 2, payload: vec![2] },
                 signature: CrashSignature {
-                    category: FailureClass::State,
+                    category: FailureClass::State.to_string(),
                     digest: 2,
                     signature_hash: 2,
                 },
                 environment: None,
                 failure_payload: vec![],
+                rpc_envelope: None,
             },
         ];
 

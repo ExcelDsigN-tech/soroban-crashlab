@@ -81,6 +81,11 @@ pub use container_stress::{
     ContainerStressConfig, ContainerStressMutator, generate_container_stress_grid,
 };
 
+pub mod crash_index;
+pub use crash_index::{CrashGroup, CrashGroupRecord, CrashIndex, CrashIndexSummary};
+
+pub mod mutation_budget;
+pub use mutation_budget::{BudgetReport, MutationBudget};
 pub mod stale_detector;
 pub use stale_detector::{StaleDetectorConfig, StaleRunDetector, StaleStatus};
 

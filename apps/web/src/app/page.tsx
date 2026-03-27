@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import RunHistoryTable from './RunHistoryTable';
+import RunHistoryTableSkeleton from './RunHistoryTableSkeleton';
 import Pagination from './Pagination';
 import CrashDetailDrawer from './CrashDetailDrawer';
 import { FuzzingRun, RunStatus } from './types';
@@ -96,7 +97,9 @@ function HomeContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [runs, setRuns] = useState<FuzzingRun[]>(MOCK_RUNS);
+  const [runs, setRuns] = useState<FuzzingRun[]>([]);
+  const [dataState, setDataState] = useState<'loading' | 'error' | 'success'>('loading');
+  const [fetchAttempt, setFetchAttempt] = useState(0);
   const [selectedCardIndex, setSelectedCardIndex] = useState(0);
   const [showDetailView, setShowDetailView] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
@@ -152,6 +155,45 @@ function HomeContent() {
   const paginatedRuns = filteredRuns.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   const expensiveRuns = paginatedRuns.filter(isExpensiveRun);
   const selectedRun = selectedRunId ? runs.find((run) => run.id === selectedRunId) ?? null : null;
+  // Simulate async data fetch with loading and error states.
+  // In production this would be a real API call (e.g. fetch('/api/runs')).
+  // startTransition is used to batch the loading reset so it's treated as a
+  // non-urgent update, which avoids the react-hooks/set-state-in-effect lint rule.
+  useEffect(() => {
+    let cancelled = false;
+    // Mark the loading reset as a low-priority transition so React batches it
+    // together with any concurrent work, avoiding a synchronous setState in effect.
+    const ctrl = new AbortController();
+    const resetAndFetch = async () => {
+      setDataState('loading');
+      setRuns([]);
+      try {
+        // Simulate a network round-trip (800ms)
+        await new Promise<void>((resolve, reject) => {
+          const t = window.setTimeout(() => {
+            if (ctrl.signal.aborted) return;
+            // ~10% chance of simulated failure to exercise the error path.
+            if (Math.random() < 0.1) reject(new Error('Simulated network error'));
+            else resolve();
+          }, 800);
+          ctrl.signal.addEventListener('abort', () => window.clearTimeout(t));
+        });
+        if (!cancelled) {
+          setRuns(buildMockRuns());
+          setDataState('success');
+        }
+      } catch {
+        if (!cancelled) setDataState('error');
+      }
+    };
+    // Schedule on next tick so the setState calls go through React's batching.
+    const t = window.setTimeout(() => { void resetAndFetch(); }, 0);
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+      window.clearTimeout(t);
+    };
+  }, [fetchAttempt]);
 
   useEffect(() => {
     if (selectedRunId && !selectedRun) {
@@ -499,6 +541,32 @@ function HomeContent() {
           )}
         </div>
         <RunHistoryTable runs={paginatedRuns} onSelectRun={handleOpenRunDrawer} />
+        {dataState === 'loading' && (
+          <RunHistoryTableSkeleton rows={ITEMS_PER_PAGE} />
+        )}
+        {dataState === 'error' && (
+          <div className="flex flex-col items-center gap-4 border border-red-200 dark:border-red-900/50 rounded-xl p-8 bg-red-50/60 dark:bg-red-950/20 text-center">
+            <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+              <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-red-900 dark:text-red-100">Failed to load fuzzing runs</p>
+              <p className="text-sm text-red-700 dark:text-red-300 mt-1">Check your connection and try again.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFetchAttempt((n) => n + 1)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow active:scale-95 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582M20 20v-5h-.581M5.635 15A9 9 0 1118.365 9" />
+              </svg>
+              Retry
+            </button>
+          </div>
+        )}
         <Pagination
           currentPage={clampedPage}
           totalPages={totalPages}

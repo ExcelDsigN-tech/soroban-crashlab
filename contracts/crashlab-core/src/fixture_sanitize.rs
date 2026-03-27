@@ -124,6 +124,7 @@ pub fn sanitize_bundle_for_sharing(bundle: &CaseBundle) -> CaseBundle {
         seed,
         environment: bundle.environment.clone(),
         failure_payload: sanitize_payload_fragments(&bundle.failure_payload),
+        rpc_envelope: None,
     }
 }
 
@@ -136,6 +137,7 @@ pub fn sanitize_bundle_document_for_sharing(bundle: &CaseBundle) -> CaseBundleDo
         signature: sanitized.signature,
         environment: sanitized.environment,
         failure_payload: sanitized.failure_payload,
+        rpc_envelope: None,
     }
 }
 
@@ -208,6 +210,7 @@ mod tests {
             }),
             environment: None,
             failure_payload: b"Authorization: Bearer super-secret-token\npanic: trap".to_vec(),
+            rpc_envelope: None,
         };
 
         let sanitized = sanitize_bundle_for_sharing(&bundle);
@@ -231,6 +234,7 @@ mod tests {
             }),
             environment: None,
             failure_payload: b"Set-Cookie: session=abc123; Path=/".to_vec(),
+            rpc_envelope: None,
         };
 
         let sanitized = sanitize_bundle_for_sharing(&bundle);
@@ -257,6 +261,7 @@ mod tests {
             signature: classify(&seed),
             environment: None,
             failure_payload: vec![],
+            rpc_envelope: None,
         };
 
         let sanitized = sanitize_bundle_for_sharing(&bundle);
@@ -279,6 +284,7 @@ mod tests {
             }),
             environment: None,
             failure_payload: b"cookie=session-123".to_vec(),
+            rpc_envelope: None,
         };
 
         let json = String::from_utf8(save_sanitized_case_bundle_json(&bundle).unwrap()).unwrap();
@@ -301,6 +307,7 @@ mod tests {
             }),
             environment: None,
             failure_payload: b"Authorization: Bearer super-secret-token".to_vec(),
+            rpc_envelope: None,
         };
 
         let sanitized_bundle = sanitize_bundle_for_sharing(&bundle);
@@ -330,6 +337,7 @@ mod tests {
             }),
             environment: None,
             failure_payload: vec![],
+            rpc_envelope: None,
         };
 
         let scenario = sanitized_failure_scenario(&bundle, "public");
