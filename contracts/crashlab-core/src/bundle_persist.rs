@@ -90,9 +90,7 @@ impl CaseBundleDocument {
     /// Converts this document into a [`CaseBundle`] after validating `schema`.
     pub fn into_bundle(self) -> Result<CaseBundle, BundlePersistError> {
         if !SUPPORTED_BUNDLE_SCHEMAS.contains(&self.schema) {
-            return Err(BundlePersistError::UnsupportedSchema {
-                found: self.schema,
-            });
+            return Err(BundlePersistError::UnsupportedSchema { found: self.schema });
         }
         Ok(CaseBundle {
             seed: self.seed,
@@ -104,6 +102,10 @@ impl CaseBundleDocument {
 }
 
 /// Serializes `bundle` to pretty-printed JSON bytes (UTF-8) including `schema`.
+///
+/// This preserves the raw fixture contents. For public sharing, prefer
+/// [`crate::save_sanitized_case_bundle_json`] to scrub secret-like fragments from
+/// the seed and failure payloads before export.
 pub fn save_case_bundle_json(bundle: &CaseBundle) -> Result<Vec<u8>, BundlePersistError> {
     let doc = CaseBundleDocument::from_bundle(bundle);
     Ok(serde_json::to_vec_pretty(&doc)?)
@@ -135,7 +137,7 @@ pub fn read_case_bundle_json<R: Read>(reader: &mut R) -> Result<CaseBundle, Bund
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{to_bundle, to_bundle_with_environment, CrashSignature};
+    use crate::{CrashSignature, to_bundle, to_bundle_with_environment};
 
     #[test]
     fn roundtrip_preserves_seed_signature_and_environment() {

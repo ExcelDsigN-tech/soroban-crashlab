@@ -9,13 +9,13 @@ use serde::{Deserialize, Serialize};
 pub struct FailureScenario {
     /// Unique identifier for the seed that produced this failure.
     pub seed_id: u64,
-    
+
     /// Input payload as a hex-encoded string for JSON compatibility.
     pub input_payload: String,
-    
+
     /// Execution mode or context (e.g., "invoker", "contract", "none").
     pub mode: String,
-    
+
     /// Expected failure classification (e.g., "runtime-failure", "empty-input").
     pub failure_class: String,
 }
@@ -48,6 +48,10 @@ impl FailureScenario {
 ///
 /// A JSON string representation of the failure scenario, or an error if serialization fails.
 ///
+/// This exports the raw bundle payload. For public sharing, prefer
+/// [`crate::export_sanitized_scenario_json`] so secret-like fragments are
+/// scrubbed before the payload is hex-encoded into JSON.
+///
 /// # Example
 ///
 /// ```rust
@@ -69,7 +73,7 @@ pub fn export_scenario_json(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{to_bundle, CaseSeed};
+    use crate::{CaseSeed, to_bundle};
 
     #[test]
     fn scenario_contains_all_required_fields() {
@@ -77,9 +81,9 @@ mod tests {
             id: 123,
             payload: vec![0xAA, 0xBB, 0xCC],
         });
-        
+
         let scenario = FailureScenario::from_bundle(&bundle, "invoker");
-        
+
         assert_eq!(scenario.seed_id, 123);
         assert!(!scenario.input_payload.is_empty());
         assert_eq!(scenario.mode, "invoker");
@@ -92,11 +96,16 @@ mod tests {
             id: 1,
             payload: vec![0x01, 0x02, 0x03],
         });
-        
+
         let scenario = FailureScenario::from_bundle(&bundle, "contract");
-        
+
         // After mutation, payload will be different, but should still be valid hex
-        assert!(scenario.input_payload.chars().all(|c| c.is_ascii_hexdigit()));
+        assert!(
+            scenario
+                .input_payload
+                .chars()
+                .all(|c| c.is_ascii_hexdigit())
+        );
         assert_eq!(scenario.input_payload.len() % 2, 0); // Even length for hex
     }
 
@@ -106,9 +115,9 @@ mod tests {
             id: 42,
             payload: vec![1, 2, 3, 4],
         });
-        
+
         let json = export_scenario_json(&bundle, "none").unwrap();
-        
+
         // Verify it's valid JSON by parsing it back
         let parsed: FailureScenario = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.seed_id, 42);
@@ -121,9 +130,9 @@ mod tests {
             id: 999,
             payload: vec![0xFF],
         });
-        
+
         let json = export_scenario_json(&bundle, "invoker").unwrap();
-        
+
         assert!(json.contains("\"seed_id\""));
         assert!(json.contains("\"input_payload\""));
         assert!(json.contains("\"mode\""));
@@ -138,9 +147,9 @@ mod tests {
             id: 7,
             payload: vec![],
         });
-        
+
         let scenario = FailureScenario::from_bundle(&bundle, "contract");
-        
+
         assert_eq!(scenario.seed_id, 7);
         assert_eq!(scenario.input_payload, ""); // Empty hex string
         assert_eq!(scenario.failure_class, "empty-input");
@@ -152,11 +161,11 @@ mod tests {
             id: 1,
             payload: vec![1],
         });
-        
+
         let scenario_invoker = FailureScenario::from_bundle(&bundle, "invoker");
         let scenario_contract = FailureScenario::from_bundle(&bundle, "contract");
         let scenario_none = FailureScenario::from_bundle(&bundle, "none");
-        
+
         assert_eq!(scenario_invoker.mode, "invoker");
         assert_eq!(scenario_contract.mode, "contract");
         assert_eq!(scenario_none.mode, "none");
@@ -168,10 +177,9 @@ mod tests {
             id: 50,
             payload: vec![1; 100], // Oversized
         });
-        
+
         let scenario = FailureScenario::from_bundle(&bundle, "invoker");
-        
+
         assert_eq!(scenario.failure_class, bundle.signature.category);
     }
 }
-

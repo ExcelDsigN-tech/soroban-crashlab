@@ -309,7 +309,26 @@ for bundle in new_failures {
 }
 ```
 
-### 4. Use Reproducible CI Environment
+### 4. Sanitize Public Fixtures
+
+When a fixture needs to be attached to a public issue or shared outside the
+trusted team boundary, export it through the sanitization helpers instead of the
+raw JSON writers:
+
+```rust
+use crashlab_core::{
+    export_sanitized_scenario_json, save_sanitized_case_bundle_json,
+};
+
+let public_bundle_json = save_sanitized_case_bundle_json(&bundle)?;
+let public_scenario_json = export_sanitized_scenario_json(&bundle, "public")?;
+```
+
+These helpers preserve payload length and failure class while redacting
+secret-like fragments such as bearer tokens, cookies, and password-style key
+value pairs from exported fixture payloads.
+
+### 5. Use Reproducible CI Environment
 
 ```dockerfile
 FROM rust:1.75-slim

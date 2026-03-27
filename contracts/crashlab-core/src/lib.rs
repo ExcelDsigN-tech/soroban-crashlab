@@ -5,10 +5,10 @@ pub mod reproducer;
 pub mod taxonomy;
 
 pub use auth_matrix::{AuthMode, MatrixReport, ModeResult, collect_mismatched, run_matrix};
-pub use prng::SeededPrng;
 pub use health::{
     FailureMetrics, HealthMonitor, HealthStatus, HealthSummary, QueueMetrics, ThroughputMetrics,
 };
+pub use prng::SeededPrng;
 pub use reproducer::{
     FlakyDetector, ReproReport, filter_ci_pack, shrink_bundle_payload,
     shrink_seed_preserving_signature,
@@ -36,23 +36,30 @@ pub use boundary::{BoundaryMutator, generate_boundary_vectors};
 
 pub mod bundle_persist;
 pub use bundle_persist::{
-    read_case_bundle_json, save_case_bundle_json, write_case_bundle_json, BundlePersistError,
-    CaseBundleDocument, CASE_BUNDLE_SCHEMA_VERSION, SUPPORTED_BUNDLE_SCHEMAS,
+    BundlePersistError, CASE_BUNDLE_SCHEMA_VERSION, CaseBundleDocument, SUPPORTED_BUNDLE_SCHEMAS,
+    read_case_bundle_json, save_case_bundle_json, write_case_bundle_json,
 };
 
 pub mod fixture_compat;
 pub use fixture_compat::{CompatReport, CompatWarning, check_bundle_fixtures, check_seed_fixtures};
 
+pub mod fixture_sanitize;
+pub use fixture_sanitize::{
+    export_sanitized_scenario_json, sanitize_bundle_document_for_sharing,
+    sanitize_bundle_for_sharing, sanitize_payload_fragments, sanitize_seed_for_sharing,
+    sanitized_failure_scenario, save_sanitized_case_bundle_json,
+};
+
 pub mod checkpoint;
 pub use checkpoint::{
-    load_run_checkpoint_json, save_run_checkpoint_json, CheckpointError, RunCheckpoint,
-    RUN_CHECKPOINT_SCHEMA_VERSION,
+    CheckpointError, RUN_CHECKPOINT_SCHEMA_VERSION, RunCheckpoint, load_run_checkpoint_json,
+    save_run_checkpoint_json,
 };
 
 pub mod corpus;
 pub use corpus::{
-    corpus_archive_from_seeds, export_corpus_json, import_corpus_json, CorpusArchive, CorpusError,
-    CORPUS_ARCHIVE_SCHEMA_VERSION,
+    CORPUS_ARCHIVE_SCHEMA_VERSION, CorpusArchive, CorpusError, corpus_archive_from_seeds,
+    export_corpus_json, import_corpus_json,
 };
 
 pub mod scenario_export;
@@ -60,12 +67,12 @@ pub use scenario_export::{FailureScenario, export_scenario_json};
 
 pub mod simulation;
 pub use simulation::{
-    run_simulation_with_timeout, timeout_crash_signature, RunMetadata, SimulationTimeoutConfig,
+    RunMetadata, SimulationTimeoutConfig, run_simulation_with_timeout, timeout_crash_signature,
 };
 
 pub mod container_stress;
 pub use container_stress::{
-    generate_container_stress_grid, ContainerStressConfig, ContainerStressMutator,
+    ContainerStressConfig, ContainerStressMutator, generate_container_stress_grid,
 };
 
 pub mod run_control;
@@ -142,11 +149,7 @@ impl CaseBundle {
 
 pub fn mutate_seed(seed: &CaseSeed) -> CaseSeed {
     let mut rng = SeededPrng::new(seed.id);
-    let payload = seed
-        .payload
-        .iter()
-        .map(|b| b ^ rng.next_byte())
-        .collect();
+    let payload = seed.payload.iter().map(|b| b ^ rng.next_byte()).collect();
 
     CaseSeed {
         id: seed.id,
