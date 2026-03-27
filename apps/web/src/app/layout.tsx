@@ -28,6 +28,7 @@ export default function RootLayout({
         <header className="border-b border-black/[.08] dark:border-white/[.145] p-6 flex items-center justify-between">
           <div className="font-semibold text-xl tracking-tight">Soroban CrashLab</div>
           <nav className="flex gap-4 text-sm font-medium">
+            <a href="/add-accessible-keyboard-nav-blueprint-page-49" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Keyboard Nav</a>
             <a href="https://github.com/SorobanCrashLab/soroban-crashlab" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href="https://github.com/SorobanCrashLab/soroban-crashlab/issues" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener noreferrer">Open Issues</a>
           </nav>
