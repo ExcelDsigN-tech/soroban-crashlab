@@ -11,6 +11,10 @@ Most contract failures happen in edge cases that are not covered by manual tests
 - convert failures into deterministic regression tests
 - review risk and state-impact signals in a frontend dashboard
 
+## Security
+
+To report a vulnerability, see our [Security Policy](.github/SECURITY.md). Do not open a public issue for security concerns.
+
 ## Repository structure
 
 - `apps/web`: Next.js frontend dashboard for runs, failures, and replay output

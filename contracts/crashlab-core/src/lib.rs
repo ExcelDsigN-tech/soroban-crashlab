@@ -40,6 +40,9 @@ pub use bundle_persist::{
     read_case_bundle_json, save_case_bundle_json, write_case_bundle_json,
 };
 
+pub mod artifact_compress;
+pub use artifact_compress::{compress_artifact, decompress_artifact};
+
 pub mod fixture_compat;
 pub use fixture_compat::{CompatReport, CompatWarning, check_bundle_fixtures, check_seed_fixtures};
 
@@ -83,6 +86,8 @@ pub use crash_index::{CrashGroup, CrashGroupRecord, CrashIndex, CrashIndexSummar
 
 pub mod mutation_budget;
 pub use mutation_budget::{BudgetReport, MutationBudget};
+pub mod stale_detector;
+pub use stale_detector::{StaleDetectorConfig, StaleRunDetector, StaleStatus};
 
 pub mod run_control;
 pub use run_control::{
