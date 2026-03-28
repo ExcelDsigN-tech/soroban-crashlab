@@ -140,7 +140,7 @@ where
 pub fn shrink_seed_preserving_signature<F>(
     seed: &CaseSeed,
     expected: &CrashSignature,
-    reproducer: F,
+    mut reproducer: F,
 ) -> Result<CaseSeed, SimulationError>
 where
     F: FnMut(&CaseSeed) -> Result<CrashSignature, SimulationError>,
