@@ -32,6 +32,7 @@ export default function RootLayout({
             <nav className="flex gap-4 text-sm font-medium">
               <a href="/add-accessible-keyboard-nav-blueprint-page-49" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Keyboard Nav</a>
               <a href="/implement-alerting-settings-page-54" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Alerts</a>
+              <a href="/#reporting-templates" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Templates</a>
               <a href="https://github.com/SorobanCrashLab/soroban-crashlab" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a href="https://github.com/SorobanCrashLab/soroban-crashlab/issues" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors" target="_blank" rel="noopener noreferrer">Open Issues</a>
             </nav>

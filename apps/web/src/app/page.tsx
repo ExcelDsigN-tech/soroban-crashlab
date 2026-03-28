@@ -22,6 +22,7 @@ import FailureClusterView from './FailureClusterView';
 import MaintainerToggle from './MaintainerToggle';
 import { useMaintainerMode } from './useMaintainerMode';
 import AlertPresets from './AlertPresets';
+import CreateReportingTemplatesPage60 from './create-reporting-templates-page-60';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -600,6 +601,10 @@ function HomeContent() {
 
       <div className="mb-12 w-full">
         <AlertPresets onSelectPreset={(config) => console.log('Applied Alert Preset:', config)} />
+      </div>
+
+      <div className="mb-12 w-full">
+        <CreateReportingTemplatesPage60 />
       </div>
 
       {isMaintainer && (
