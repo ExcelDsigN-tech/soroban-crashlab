@@ -23,6 +23,9 @@ import MaintainerToggle from './MaintainerToggle';
 import { useMaintainerMode } from './useMaintainerMode';
 import AlertPresets from './AlertPresets';
 import CreateReportingTemplatesPage60 from './create-reporting-templates-page-60';
+import TimelineScrubber from './implement-timeline-scrubber-component-component';
+import ColumnCustomization, { ColumnId } from './add-column-customization';
+import IssueTriageBoard from './add-issue-triage-board-ui';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -91,6 +94,7 @@ function HomeContent() {
   const [reportRun, setReportRun] = useState<FuzzingRun | null>(null);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
   const { isMaintainer, toggle: toggleMaintainerMode, mounted: maintainerMounted } = useMaintainerMode();
+  const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>(['id', 'status', 'duration', 'seedCount', 'report']);
 
   const selectedRunId = searchParams.get('run');
   const statusFilter = STATUS_OPTIONS.includes((searchParams.get('status') ?? 'all') as 'all' | RunStatus)
@@ -468,6 +472,10 @@ function HomeContent() {
         })}
       </div>
 
+      {dataState === 'success' && (
+        <TimelineScrubber runs={runs} onSelectRun={handleOpenRunDrawer} />
+      )}
+
       {dataState === 'loading' && (
         <div className="w-full h-48 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse mb-6" />
       )}
@@ -477,6 +485,10 @@ function HomeContent() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Recent Fuzzing Runs</h2>
           <div className="flex items-center gap-3">
+            <ColumnCustomization 
+              visibleColumns={visibleColumns} 
+              onChange={setVisibleColumns} 
+            />
             <button
               type="button"
               onClick={handleCopyPermalink}
@@ -557,7 +569,12 @@ function HomeContent() {
         {isMaintainer && (
           <FailureClusterView runs={runs} pathname={pathname} queryString={stableQueryString} />
         )}
-        <RunHistoryTable runs={paginatedRuns} onSelectRun={handleOpenRunDrawer} onViewReport={setReportRun} />
+        <RunHistoryTable 
+          runs={paginatedRuns} 
+          onSelectRun={handleOpenRunDrawer} 
+          onViewReport={setReportRun} 
+          visibleColumns={visibleColumns}
+        />
         {dataState === 'loading' && (
           <RunHistoryTableSkeleton rows={ITEMS_PER_PAGE} />
         )}
@@ -606,6 +623,10 @@ function HomeContent() {
 
       <div className="mb-12 w-full">
         <AddTaggingAndLabelsUi runs={filteredRuns} />
+      </div>
+
+      <div className="mb-12 w-full">
+        <IssueTriageBoard runs={runs} />
       </div>
 
       <div className="mb-12 w-full">

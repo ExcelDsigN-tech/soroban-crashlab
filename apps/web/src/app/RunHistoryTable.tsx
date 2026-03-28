@@ -9,6 +9,8 @@ interface RunHistoryTableProps {
     onSelectRun: (runId: string) => void;
     /** Called when the report button is clicked for a run */
     onViewReport: (run: FuzzingRun) => void;
+    /** List of visible columns */
+    visibleColumns?: string[];
 }
 
 /**
@@ -51,7 +53,7 @@ const StatusBadge = ({ status }: { status: RunStatus }) => {
 /**
  * Table component for displaying a list of fuzzing runs.
  */
-export default function RunHistoryTable({ runs, onSelectRun, onViewReport }: RunHistoryTableProps) {
+export default function RunHistoryTable({ runs, onSelectRun, onViewReport, visibleColumns = ['id', 'status', 'duration', 'seedCount', 'report'] }: RunHistoryTableProps) {
     if (runs.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-12 border border-dashed rounded-xl bg-zinc-50 dark:bg-zinc-900/20 border-zinc-200 dark:border-zinc-800">
@@ -67,11 +69,11 @@ export default function RunHistoryTable({ runs, onSelectRun, onViewReport }: Run
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
-                            <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Run ID</th>
-                            <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Status</th>
-                            <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Duration</th>
-                            <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Seed Count</th>
-                            <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Report</th>
+                            {visibleColumns.includes('id') && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Run ID</th>}
+                            {visibleColumns.includes('status') && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Status</th>}
+                            {visibleColumns.includes('duration') && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Duration</th>}
+                            {visibleColumns.includes('seedCount') && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Seed Count</th>}
+                            {visibleColumns.includes('report') && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100 text-right">Report</th>}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -88,40 +90,50 @@ export default function RunHistoryTable({ runs, onSelectRun, onViewReport }: Run
                                     }
                                 }}
                             >
-                                <td className="px-6 py-4">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onSelectRun(run.id);
-                                        }}
-                                        className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline decoration-blue-500/30 underline-offset-4 text-left"
-                                    >
-                                        {run.id}
-                                    </button>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <StatusBadge status={run.status} />
-                                </td>
-                                <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400 text-right tabular-nums">
-                                    {formatDuration(run.duration)}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400 text-right tabular-nums">
-                                    {run.seedCount.toLocaleString()}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onViewReport(run);
-                                        }}
-                                        className="text-xs font-medium px-3 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                                        aria-label={`View markdown report for ${run.id}`}
-                                    >
-                                        View Report
-                                    </button>
-                                </td>
+                                {visibleColumns.includes('id') && (
+                                    <td className="px-6 py-4">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onSelectRun(run.id);
+                                            }}
+                                            className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline decoration-blue-500/30 underline-offset-4 text-left"
+                                        >
+                                            {run.id}
+                                        </button>
+                                    </td>
+                                )}
+                                {visibleColumns.includes('status') && (
+                                    <td className="px-6 py-4">
+                                        <StatusBadge status={run.status} />
+                                    </td>
+                                )}
+                                {visibleColumns.includes('duration') && (
+                                    <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400 text-right tabular-nums">
+                                        {formatDuration(run.duration)}
+                                    </td>
+                                )}
+                                {visibleColumns.includes('seedCount') && (
+                                    <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400 text-right tabular-nums">
+                                        {run.seedCount.toLocaleString()}
+                                    </td>
+                                )}
+                                {visibleColumns.includes('report') && (
+                                    <td className="px-6 py-4 text-right">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onViewReport(run);
+                                            }}
+                                            className="text-xs font-medium px-3 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                                            aria-label={`View markdown report for ${run.id}`}
+                                        >
+                                            View Report
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>
