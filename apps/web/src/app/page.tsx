@@ -14,6 +14,7 @@ import CreateRunHeatmapPage55 from './create-run-heatmap-page-55';
 import AddRunComparisonCharts from './add-run-comparison-charts';
 import AddTaggingAndLabelsUi from './add-tagging-and-labels-ui';
 import AlertingSettingsPage54 from './implement-alerting-settings-page-54';
+import AlertingSettingsPage from './create-alerting-settings-page-page';
 import CrossRunBoardWidgets from './implement-cross-run-board-widgets-component';
 import CrossRunBoardCustomWidgets from './create-cross-run-board-custom-widgets-63';
 import RunClusterVisualization from './add-run-cluster-visualization';
@@ -27,6 +28,7 @@ import TimelineScrubber from './implement-timeline-scrubber-component-component'
 import ColumnCustomization, { ColumnId } from './add-column-customization';
 import IssueTriageBoard from './add-issue-triage-board-ui';
 import CampaignMilestoneTimeline from './campaign-milestone-timeline-55';
+import VirtualizedRunTable from './implement-virtualized-run-table-component';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -610,6 +612,33 @@ function HomeContent() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+
+        {/* Virtualized run table — renders all filtered runs without pagination */}
+        {dataState === 'success' && filteredRuns.length > 0 && (
+          <div className="mt-10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold">Virtualized Run Table</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  All {filteredRuns.length} runs rendered in a single scrollable viewport — only visible rows are in the DOM.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Virtualized
+              </span>
+            </div>
+            <VirtualizedRunTable
+              runs={filteredRuns}
+              viewportHeight={480}
+              onSelectRun={handleOpenRunDrawer}
+              onViewReport={setReportRun}
+              visibleColumns={visibleColumns}
+            />
+          </div>
+        )}
       </div>
 
       <div className="mb-12 w-full">
@@ -650,6 +679,12 @@ function HomeContent() {
       {isMaintainer && (
         <div className="mb-12 w-full">
           <AlertingSettingsPage54 />
+        </div>
+      )}
+
+      {isMaintainer && (
+        <div className="mb-12 w-full">
+          <AlertingSettingsPage />
         </div>
       )}
 
