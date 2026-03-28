@@ -21,6 +21,7 @@ import RunClusterOverview from './add-run-cluster-overview';
 import FailureClusterView from './FailureClusterView';
 import MaintainerToggle from './MaintainerToggle';
 import { useMaintainerMode } from './useMaintainerMode';
+import AlertPresets from './AlertPresets';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -590,6 +591,10 @@ function HomeContent() {
 
       <div className="mb-12 w-full">
         <AddTaggingAndLabelsUi runs={filteredRuns} />
+      </div>
+
+      <div className="mb-12 w-full">
+        <AlertPresets onSelectPreset={(config) => console.log('Applied Alert Preset:', config)} />
       </div>
 
       {isMaintainer && (
