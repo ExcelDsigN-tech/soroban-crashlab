@@ -21,7 +21,7 @@ const BulkActionsForRuns: React.FC<BulkActionsProps> = ({
 }) => {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<BulkAction | null>(null);
-  const [actionData, setActionData] = useState<Record<string, unknown>>({});
+  const [actionData, setActionData] = useState<Record<string, string | boolean>>({});
 
   const handleActionSelect = useCallback((action: BulkAction) => {
     setSelectedAction(action);
@@ -105,7 +105,7 @@ const BulkActionsForRuns: React.FC<BulkActionsProps> = ({
                   Export Format
                 </label>
                 <select
-                  value={(actionData.format as string) || 'json'}
+                  value={String(actionData.format || 'json')}
                   onChange={(e) => setActionData({ ...actionData, format: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -118,7 +118,7 @@ const BulkActionsForRuns: React.FC<BulkActionsProps> = ({
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={(actionData.includeCrashDetails as boolean) || false}
+                    checked={Boolean(actionData.includeCrashDetails)}
                     onChange={(e) => setActionData({ ...actionData, includeCrashDetails: e.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -136,7 +136,7 @@ const BulkActionsForRuns: React.FC<BulkActionsProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={(actionData.tags as string) || ''}
+                  value={String(actionData.tags || '')}
                   onChange={(e) => setActionData({ ...actionData, tags: e.target.value })}
                   placeholder="e.g., high-priority, needs-review"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -152,7 +152,7 @@ const BulkActionsForRuns: React.FC<BulkActionsProps> = ({
                   Assign To
                 </label>
                 <select
-                  value={(actionData.assignee as string) || ''}
+                  value={String(actionData.assignee || '')}
                   onChange={(e) => setActionData({ ...actionData, assignee: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >

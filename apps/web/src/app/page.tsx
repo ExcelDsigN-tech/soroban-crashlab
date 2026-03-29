@@ -37,6 +37,7 @@ import AddRunStatusTimeline from './add-run-status-timeline';
 import AddExportRunJson from './add-export-run-json';
 import AddExportRunCsv from './add-export-run-csv';
 import IntegrateWebhookManagerForRunEvents from './integrate-webhook-manager-for-run-events';
+import OnboardingChecklistModal from './implement-onboarding-checklist-modal-component';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -72,6 +73,8 @@ const CPU_WARNING = 900_000;
 const MEMORY_WARNING = 7_000_000;
 const FEE_WARNING = 3_000;
 const STATUS_OPTIONS: Array<'all' | RunStatus> = ['all', 'running', 'completed', 'failed', 'cancelled'];
+const ONBOARDING_SEEN_STORAGE_KEY = 'crashlab:onboarding-checklist-seen:v1';
+const ONBOARDING_DISMISSED_STORAGE_KEY = 'crashlab:onboarding-checklist-dismissed:v1';
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -101,6 +104,7 @@ function HomeContent() {
   const [selectedCardIndex, setSelectedCardIndex] = useState(0);
   const [showDetailView, setShowDetailView] = useState(false);
   const [showHelp, setShowHelp] = useState(true);
+  const [showOnboardingChecklist, setShowOnboardingChecklist] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [reportRun, setReportRun] = useState<FuzzingRun | null>(null);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
@@ -153,6 +157,24 @@ function HomeContent() {
     () => toStableQueryString(new URLSearchParams(searchParams.toString())),
     [searchParams],
   );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const hasSeenOnboarding = localStorage.getItem(ONBOARDING_SEEN_STORAGE_KEY) === 'true';
+        const hasDismissedOnboarding = localStorage.getItem(ONBOARDING_DISMISSED_STORAGE_KEY) === 'true';
+
+        if (!hasSeenOnboarding && !hasDismissedOnboarding) {
+          localStorage.setItem(ONBOARDING_SEEN_STORAGE_KEY, 'true');
+          setShowOnboardingChecklist(true);
+        }
+      } catch {
+        setShowOnboardingChecklist(true);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const totalPages = Math.max(1, Math.ceil(filteredRuns.length / ITEMS_PER_PAGE));
   const clampedPage = Math.min(currentPage, totalPages);
@@ -319,10 +341,39 @@ function HomeContent() {
     setShowDetailView(true);
   };
 
+  const handleOpenOnboardingChecklist = useCallback(() => {
+    setShowOnboardingChecklist(true);
+    try {
+      localStorage.setItem(ONBOARDING_SEEN_STORAGE_KEY, 'true');
+      localStorage.setItem(ONBOARDING_DISMISSED_STORAGE_KEY, 'false');
+    } catch {
+      // ignore storage write errors
+    }
+  }, []);
+
+  const handleCloseOnboardingChecklist = useCallback(() => {
+    setShowOnboardingChecklist(false);
+    try {
+      localStorage.setItem(ONBOARDING_DISMISSED_STORAGE_KEY, 'true');
+    } catch {
+      // ignore storage write errors
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center py-20 px-8 max-w-5xl mx-auto w-full">
       {/* Role toggle */}
-      <div className="w-full flex justify-end mb-6">
+      <div className="w-full flex flex-wrap justify-end gap-3 mb-6">
+        <button
+          type="button"
+          onClick={handleOpenOnboardingChecklist}
+          className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:border-blue-800 dark:hover:bg-blue-950/60"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Onboarding checklist
+        </button>
         <MaintainerToggle
           isMaintainer={isMaintainer}
           onToggle={toggleMaintainerMode}
@@ -497,7 +548,7 @@ function HomeContent() {
       )}
       {dataState === 'success' && <RunClusterOverview runs={runs} />}
 
-      <div className="w-full mb-8">
+      <div id="recent-runs" className="w-full mb-8 scroll-mt-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Recent Fuzzing Runs</h2>
           <div className="flex items-center gap-3">
@@ -790,6 +841,11 @@ function HomeContent() {
           runId={reportRun.id}
         />
       )}
+
+      <OnboardingChecklistModal
+        isOpen={showOnboardingChecklist}
+        onClose={handleCloseOnboardingChecklist}
+      />
 
       {selectedRun && (
         <CrashDetailDrawer
