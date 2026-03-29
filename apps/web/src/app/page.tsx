@@ -31,6 +31,7 @@ import CampaignMilestoneTimeline from './campaign-milestone-timeline-55';
 import VirtualizedRunTable from './implement-virtualized-run-table-component';
 import ReportingTemplatesManager from './add-reporting-templates-manager';
 import AutomatedRegressionDeployIntegration from './integrate-automated-regression-deploy-integration';
+import ReportGenerator from './add-report-generator';
 
 // Mock data for demonstration
 const MOCK_RUNS: FuzzingRun[] = Array.from({ length: 25 }, (_, i) => ({
@@ -639,6 +640,13 @@ function HomeContent() {
               onViewReport={setReportRun}
               visibleColumns={visibleColumns}
             />
+          </div>
+        )}
+
+        {/* Report Generator Section */}
+        {dataState === 'success' && (
+          <div className="mt-12 w-full">
+            <ReportGenerator availableRuns={runs} />
           </div>
         )}
       </div>
